@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Ecommerce</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js"
+        integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ" crossorigin="anonymous"></script>
+    <style>
+        body {
+            background-color: #ffeaf2; /* Latar belakang pink lembut */
+        }
+        .navbar {
+            background-color: #f8bbd0; /* Warna soft pink */
+        }
+        .navbar .navbar-brand {
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .navbar .form-control {
+            border-radius: 20px;
+        }
+        .btn-outline-success {
+            border-color: #f48fb1;
+            color: #f48fb1;
+        }
+        .btn-outline-success:hover {
+            background-color: #f48fb1;
+            color: #fff;
+        }
+        .card {
+            border: none;
+            background-color: #fff0f6; /* Warna latar kartu */
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            color: #e91e63;
+        }
+        .btn-primary {
+            background-color: #f48fb1;
+            border: none;
+            border-radius: 20px;
+        }
+        .btn-primary:hover {
+            background-color: #ec407a;
+        }
+        .modal-header, .modal-footer {
+            background-color: #f8bbd0;
+        }
+        .modal-title, .btn-secondary {
+            color: #fff;
+        }
+        .list-group-item {
+            background-color: #fff0f6;
+            border: none;
+        }
+        .btn-danger {
+            background-color: #f06292;
+            border: none;
+        }
+        .btn-danger:hover {
+            background-color: #d81b60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <a class="navbar-brand">Mini Ecommerce</a>
+            <form class="form-inline" id="formItem">
+                <input class="form-control mr-sm-2" type="search" placeholder="Cari barang..." id="keyword" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="button" id="searchItem">Cari</button>
+            </form>
+            <button class="btn btn-primary" id="cart">
+                <i class="fas fa-shopping-cart"></i> (<span id="cartCount">0</span>)
+            </button>
+        </nav>
+        <div class="row mt-3" id="listBarang">
+            <!-- Kartu produk akan dibuat secara dinamis di sini -->
+        </div>
+        <!-- Modal Keranjang -->
+        <div class="modal fade" id="cartModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Keranjang Belanja</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul id="cartItems" class="list-group">
+                            <!-- Item keranjang akan ditampilkan di sini -->
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const items = [
+    ['001', 'Keyboard Logitech K380', 550000, 'Keyboard wireless yang nyaman untuk kerja dan portabel.', 'https://down-id.img.susercontent.com/file/3b996ded2ca6a61b8fbedecb026e4a72'],
+    ['002', 'Keyboard Razer BlackWidow', 2500000, 'Keyboard gaming mekanik dengan switch yang responsif dan lampu RGB.', 'https://blossomzones.com/wp-content/uploads/2020/09/BLACKWIDOW-V3-TKL.jpg'],
+    ['003', 'Mouse Razer DeathAdder V2', 800000, 'Mouse gaming ergonomis dengan sensor presisi tinggi.', 'https://images.tokopedia.net/img/cache/500-square/product-1/2020/8/10/5138814/5138814_2f855854-0a9b-4019-a191-1353cff29cf1_700_700'],
+    ['004', 'Mouse Logitech G502 Hero', 1200000, 'Mouse gaming dengan sensor canggih dan berat yang dapat disesuaikan.', 'https://dorangadget.com/wp-content/uploads/2021/11/Logitech-G502-Hero-Gaming-Mouse-1.jpg']
+];
+
+        let cart = [];
+
+        function renderItems(keyword = '') {
+            const listBarang = document.getElementById('listBarang');
+            listBarang.innerHTML = '';
+            const filteredItems = items.filter(item => item[1].toLowerCase().includes(keyword.toLowerCase()));
+            filteredItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'col-md-4 mb-4';
+                card.innerHTML = `
+                    <div class="card">
+                        <img src="${item[4]}" class="card-img-top" alt="${item[1]}" style="height: 200px; border-radius: 15px 15px 0 0;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">${item[1]}</h5>
+                            <p class="card-text">${item[3]}</p>
+                            <p class="card-text"><strong>Rp ${item[2].toLocaleString()}</strong></p>
+                            <button class="btn btn-primary add-to-cart" data-id="${item[0]}">Tambahkan ke keranjang</button>
+                        </div>
+                    </div>
+                `;
+                listBarang.appendChild(card);
+            });
+            attachAddToCartHandlers();
+        }
+
+        function attachAddToCartHandlers() {
+            const addToCartButtons = document.querySelectorAll('.add-to-cart');
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const itemId = button.getAttribute('data-id');
+                    const item = items.find(i => i[0] === itemId);
+                    cart.push(item);
+                    updateCartCount();
+                });
+            });
+        }
+
+        function updateCartCount() {
+            document.getElementById('cartCount').innerText = cart.length;
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cartItems');
+            cartItems.innerHTML = '';
+            cart.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    ${item[1]} - Rp ${item[2].toLocaleString()}
+                    <button class="btn btn-danger btn-sm remove-from-cart" data-index="${index}">&times;</button>
+                `;
+                cartItems.appendChild(li);
+            });
+            attachRemoveFromCartHandlers();
+        }
+
+        function attachRemoveFromCartHandlers() {
+            const removeFromCartButtons = document.querySelectorAll('.remove-from-cart');
+            removeFromCartButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const itemIndex = button.getAttribute('data-index');
+                    cart.splice(itemIndex, 1);
+                    updateCartCount();
+                    renderCart();
+                });
+            });
+        }
+
+        document.getElementById('searchItem').addEventListener('click', () => {
+            const keyword = document.getElementById('keyword').value;
+            renderItems(keyword);
+        });
+
+        document.getElementById('cart').addEventListener('click', () => {
+            renderCart();
+            $('#cartModal').modal('show');
+        });
+
+        renderItems();
+    </script>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGaHfQ3zY6dUqrUJ9OpvRlgxF7" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
